@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 min-h-screen;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-400/40 dark:bg-slate-600/40 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-500/60 dark:bg-slate-500/60;
+  }
+
+  /* ─── Native Select/Option Override (CRITICAL) ─── */
+  select {
+    @apply appearance-none;
+  }
+
+  /* Dark mode: deep dark dropdown options */
+  .dark select option {
+    background-color: #020617; /* slate-950 */
+    color: #f8fafc; /* slate-50 */
+  }
+
+  /* Light mode: black bg white text to kill OS grey */
+  select option {
+    background-color: #000000;
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  /* ─── Liquid Glass Panels ─── */
+  .glass-panel {
+    @apply bg-white/90 dark:bg-slate-900/40
+           backdrop-blur-2xl
+           border border-slate-200 dark:border-slate-700/50
+           shadow-glass-light dark:shadow-glass
+           transition-all duration-300;
+  }
+
+  .glass-panel-strong {
+    @apply bg-white dark:bg-slate-900/60
+           backdrop-blur-3xl
+           border border-slate-200 dark:border-slate-600/50
+           shadow-glass-light dark:shadow-glass
+           transition-all duration-300;
+  }
+
+  /* ─── Glass Inputs ─── */
+  .glass-input {
+    @apply w-full
+           bg-white dark:bg-slate-800/50
+           backdrop-blur-md
+           border border-slate-300 dark:border-slate-600/50
+           rounded-xl px-4 py-3
+           text-slate-900 dark:text-white
+           placeholder:text-slate-400 dark:placeholder:text-slate-500
+           focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600
+           dark:focus:ring-blue-500/50 dark:focus:border-blue-500/50
+           transition-all duration-200;
+  }
+
+  .glass-select {
+    @apply glass-input appearance-none cursor-pointer
+           bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E")]
+           bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.25rem_1.25rem]
+           pr-10;
+  }
+
+  /* ─── Label ─── */
+  .label-text {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-400 mb-1.5;
+  }
+
+  /* ─── Tabular Numbers ─── */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .text-gradient-blue {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400;
+  }
+
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue via-blue-400 to-brand-cyan;
+  }
+}

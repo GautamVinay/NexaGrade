@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ═══════════ Student Model ═══════════
+model Student {
+  id       String @id @default(uuid())
+  raNumber String @unique
+  password String
+  name     String
+  email    String @unique
+  branch   String
+  section  String
+
+  // ── Coding Platform Profile URLs (optional) ──
+  leetcode      String?
+  codeforces    String?
+  codechef      String?
+  hackerrank    String?
+  geeksforgeeks String?
+  atcoder       String?
+  hackerearth   String?
+  interviewbit  String?
+  codewars      String?
+  topcoder      String?
+
+  // ── Synced Platform Scores ──
+  leetcodeScore      Int @default(0)
+  codeforcesScore    Int @default(0)
+  codechefScore      Int @default(0)
+  hackerrankScore    Int @default(0)
+  geeksforgeeksScore Int @default(0)
+  atcoderScore       Int @default(0)
+  hackerearthScore   Int @default(0)
+  interviewbitScore  Int @default(0)
+  codewarsScore      Int @default(0)
+  topcoderScore      Int @default(0)
+
+  lastSyncedAt DateTime? @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+}
+
+// ═══════════ Faculty Model ═══════════
+model Faculty {
+  id              String @id @default(uuid())
+  facultyId       String @unique
+  password        String
+  name            String
+  email           String @unique
+  sectionInCharge String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faculty")
+}
