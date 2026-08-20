@@ -3,8 +3,10 @@ import fs from 'fs';
 import path from 'path';
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') return new Response('Setup disabled in production', { status: 403 });
+
   const rootDir = process.cwd();
-  const publicDir = path.join(rootDir, 'public');
+  const publicDir = path.join(/*turbopackIgnore: true*/ rootDir, 'public');
 
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir);
