@@ -24,8 +24,8 @@ export async function GET() {
   const results = [];
 
   for (const file of filesToMove) {
-    const src = path.join(rootDir, file);
-    const dest = path.join(publicDir, file);
+    const src = path.join(/*turbopackIgnore: true*/ rootDir, file);
+    const dest = path.join(/*turbopackIgnore: true*/ publicDir, file);
     if (fs.existsSync(src)) {
       try {
         fs.renameSync(src, dest);
