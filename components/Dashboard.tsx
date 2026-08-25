@@ -3,6 +3,34 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Eye, X, Plus, Download, CheckCircle, ExternalLink, Globe } from "lucide-react";
+import { LeetCodeActivityCell } from "@/components/LeetCodeActivityCell";
+
+/** Extract a LeetCode username from a profile URL */
+function extractLeetCodeUsername(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const match = url.trim().replace(/\/$/, "").match(/leetcode\.com\/(?:u\/)?([a-zA-Z0-9_.-]+)/);
+  return match ? match[1] : undefined;
+}
+
+/** Converts a date/timestamp into a human-readable relative string like "2 hours ago" */
+function formatRelativeTime(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return "—";
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) return "—";
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+
+  if (diffSec < 60) return "Just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
 
 interface DashboardProps {
   currentUser: any | null;
@@ -608,6 +636,7 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
                       <th className="py-3.5 px-6 font-semibold w-16 text-center">#</th>
                       <th className="py-3.5 px-4 font-semibold">Name</th>
                       <th className="py-3.5 px-4 font-semibold font-mono">RA Number</th>
+                      <th className="py-3.5 px-4 font-semibold text-center">Last Opened</th>
                       <th className="py-3.5 px-4 font-semibold text-center">Total Solved</th>
                       <th className="py-3.5 px-6 font-semibold text-center w-28">Actions</th>
                     </tr>
@@ -615,7 +644,7 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
                   <tbody className="divide-y divide-slate-100 dark:divide-[#27272a]">
                     {isLoadingStudents ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center">
+                        <td colSpan={6} className="py-8 text-center">
                           <div className="flex flex-col items-center justify-center space-y-3">
                             <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                             <div className="text-sm font-semibold text-slate-400">Loading roster...</div>
@@ -624,7 +653,7 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
                       </tr>
                     ) : (!sectionStudents || sectionStudents.length === 0) ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center text-slate-400 text-xs font-semibold">
+                        <td colSpan={6} className="py-8 text-center text-slate-400 text-xs font-semibold">
                           No students registered in this section yet.
                         </td>
                       </tr>
@@ -644,6 +673,9 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
                           </td>
                           <td className="py-4 px-4 font-mono text-xs text-slate-500 dark:text-slate-400">
                             {student?.raNumber || student?.ra || "N/A"}
+                          </td>
+                          <td className="py-3 px-4">
+                            <LeetCodeActivityCell username={extractLeetCodeUsername(student?.leetcode)} />
                           </td>
                           <td className="py-4 px-4 text-center font-mono font-bold text-yellow-500 dark:text-yellow-400">
                             {totalSolved}

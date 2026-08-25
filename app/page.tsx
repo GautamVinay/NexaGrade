@@ -60,16 +60,36 @@ export default function Page() {
     }
     setIsLoading(false);
 
-    // Fetch live top students
+    // Fetch live top students with LeetCode points
     fetch("/api/students")
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
         if (Array.isArray(data)) {
-          const processed = data.map((s: any) => {
-            const total = (s.leetcodeScore || 0) + (s.codeforcesScore || 0) + (s.codechefScore || 0) + (s.hackerrankScore || 0) + (s.geeksforgeeksScore || 0) + (s.atcoderScore || 0) + (s.hackerearthScore || 0) + (s.interviewbitScore || 0) + (s.codewarsScore || 0) + (s.topcoderScore || 0);
-            return { ...s, total };
-          });
-          const sorted = processed.sort((a: any, b: any) => b.total - a.total);
+          const enriched = await Promise.all(
+            data.map(async (s: any) => {
+              try {
+                let username = "";
+                const raw = (s.leetcode || "").trim();
+                if (raw.includes("/u/")) {
+                  username = raw.split("/u/")[1]?.replace(/\/+$/, "") || "";
+                } else if (raw.includes("leetcode.com/")) {
+                  username = raw.split("leetcode.com/")[1]?.replace(/\/+$/, "") || "";
+                } else {
+                  username = raw.replace(/\/+$/, "");
+                }
+                if (!username) return { ...s, points: 0, totalQuestions: 0 };
+
+                const res = await fetch(`/api/leetcode-stats?username=${encodeURIComponent(username)}`);
+                const stats = await res.json();
+                const points = ((stats.hard || 0) * 5) + ((stats.medium || 0) * 3) + ((stats.easy || 0) * 1);
+                const totalQuestions = (stats.hard || 0) + (stats.medium || 0) + (stats.easy || 0);
+                return { ...s, points, totalQuestions };
+              } catch {
+                return { ...s, points: 0, totalQuestions: 0 };
+              }
+            })
+          );
+          const sorted = enriched.sort((a: any, b: any) => b.points - a.points);
           setTopStudents(sorted.slice(0, 4));
         }
       })
@@ -257,24 +277,22 @@ export default function Page() {
                           <tr className="bg-slate-100 dark:bg-[#18181f] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-[#27272a]">
                             <th className="py-2.5 px-4 font-semibold w-10">#</th>
                             <th className="py-2.5 px-3 font-semibold">STUDENT</th>
-                            <th className="py-2.5 px-2 font-semibold text-center">CF</th>
-                            <th className="py-2.5 px-2 font-semibold text-center">CC</th>
-                            <th className="py-2.5 px-2 font-semibold text-center">LC</th>
+                            <th className="py-2.5 px-2 font-semibold text-center text-purple-400">POINTS</th>
                             <th className="py-2.5 px-4 font-semibold text-right">TOTAL</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-[#27272a]">
                           {topStudents.map((row, idx) => (
                             <tr key={row.raNumber || idx} className="hover:bg-slate-100/50 dark:hover:bg-[#18181f]/40 transition-colors">
-                              <td className="py-3 px-4 font-mono font-medium">{idx + 1}</td>
+                              <td className="py-3 px-4 font-mono font-medium">
+                                {idx === 0 ? "🏆" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : idx + 1}
+                              </td>
                               <td className="py-3 px-3">
                                 <div className={`font-semibold ${idx === 0 ? 'text-amber-500' : 'text-slate-900 dark:text-slate-100'}`}>{row.name || "Student"}</div>
                                 <div className="text-[10px] text-slate-500 dark:text-slate-400">{row.raNumber || "N/A"}</div>
                               </td>
-                              <td className="py-3 px-2 text-center font-mono text-red-500">{row.codeforcesScore || 0}</td>
-                              <td className="py-3 px-2 text-center font-mono text-amber-500">{row.codechefScore || 0}</td>
-                              <td className="py-3 px-2 text-center font-mono text-yellow-500">{row.leetcodeScore || 0}</td>
-                              <td className="py-3 px-4 text-right font-bold font-mono">{row.total}</td>
+                              <td className="py-3 px-2 text-center font-bold font-mono text-purple-400">{row.points ?? 0}</td>
+                              <td className="py-3 px-4 text-right font-bold font-mono text-slate-300">{row.totalQuestions ?? 0}</td>
                             </tr>
                           ))}
                         </tbody>

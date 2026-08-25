@@ -3,15 +3,19 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Trophy, Medal, Award, Eye, X, GraduationCap, Flame } from "lucide-react";
+import { LeetCodeLeaderboardRow } from "@/components/LeetCodeLeaderboardRow";
+import { StudentProfileModal } from "@/components/StudentProfileModal";
 
 /* ─── Types ─── */
 interface Student {
+  id?: string;
   rank: number;
   name: string;
   ra: string;
   raNumber?: string;
   section: string;
   branch: string;
+  leetcodeUsername?: string;
   codeforcesScore: number | null;
   codechefScore: number | null;
   leetcodeScore: number | null;
@@ -167,6 +171,8 @@ export default function LeaderboardTable() {
 
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [rankedStudents, setRankedStudents] = useState<any[]>([]);
+  const [isSorting, setIsSorting] = useState(true);
 
   // Fetch real students from API
   useEffect(() => {
@@ -175,11 +181,25 @@ export default function LeaderboardTable() {
       .then(data => {
         // Map database schema to frontend Student interface
         const formatted = data.map((s: any, idx: number) => ({
+          id: s.id,
           rank: idx + 1, // temporary rank
           name: s.name || "Unknown",
           ra: s.raNumber,
+          raNumber: s.raNumber,
           section: s.section || "A1",
           branch: s.branch || "CSE Core",
+          email: s.email || "",
+          leetcodeUsername: s.leetcode || "",
+          leetcode: s.leetcode || "",
+          codeforces: s.codeforces || "",
+          codechef: s.codechef || "",
+          hackerrank: s.hackerrank || "",
+          geeksforgeeks: s.geeksforgeeks || "",
+          atcoder: s.atcoder || "",
+          hackerearth: s.hackerearth || "",
+          interviewbit: s.interviewbit || "",
+          codewars: s.codewars || "",
+          topcoder: s.topcoder || "",
           codeforcesScore: s.codeforcesScore ?? null,
           codechefScore: s.codechefScore ?? null,
           leetcodeScore: s.leetcodeScore ?? null,
@@ -211,29 +231,65 @@ export default function LeaderboardTable() {
     };
   }, [profileStudent]);
 
-  // Compute totalScore for each student (all 10 platforms) and sort descending
-  const studentsWithTotals = useMemo(() => {
-    return students
-      .map((s) => ({
-        ...s,
-        totalScore:
-          (s.leetcodeScore || 0) +
-          (s.codeforcesScore || 0) +
-          (s.hackerrankScore || 0) +
-          (s.geeksforgeeksScore || 0) +
-          (s.codechefScore || 0) +
-          (s.atcoderScore || 0) +
-          (s.hackerearthScore || 0) +
-          (s.interviewbitScore || 0) +
-          (s.codewarsScore || 0) +
-          (s.topcoderScore || 0),
-      }))
-      .sort((a, b) => b.totalScore - a.totalScore)
-      .map((s, idx) => ({ ...s, rank: idx + 1 }));
+  // Bulk-fetch LeetCode stats for all students, sort by points descending
+  useEffect(() => {
+    if (students.length === 0) {
+      setRankedStudents([]);
+      setIsSorting(false);
+      return;
+    }
+
+    setIsSorting(true);
+
+    const fetchAllStats = async () => {
+      const enriched = await Promise.all(
+        students.map(async (student) => {
+          try {
+            // Extract username from full URL like "https://leetcode.com/u/GAUTAM_VINAY/"
+            let username = "";
+            const raw = student.leetcodeUsername || "";
+
+            if (raw.includes("/u/")) {
+              username = raw.split("/u/")[1]?.replace(/\/+$/, "") || "";
+            } else if (raw.includes("leetcode.com/")) {
+              username = raw.split("leetcode.com/")[1]?.replace(/\/+$/, "") || "";
+            } else {
+              username = raw.replace(/\/+$/, "");
+            }
+
+            // No username linked — skip fetch, resolve to zero
+            if (!username) {
+              const stats = { easy: 0, medium: 0, hard: 0 };
+              return { ...student, stats, points: 0 };
+            }
+
+            const res = await fetch(`/api/leetcode-stats?username=${encodeURIComponent(username)}`);
+            const data = await res.json();
+            const stats = {
+              easy: data.easy || 0,
+              medium: data.medium || 0,
+              hard: data.hard || 0,
+            };
+            const points = (stats.hard * 5) + (stats.medium * 3) + (stats.easy * 1);
+            return { ...student, stats, points };
+          } catch {
+            const stats = { easy: 0, medium: 0, hard: 0 };
+            return { ...student, stats, points: 0 };
+          }
+        })
+      );
+
+      // Sort descending by points
+      enriched.sort((a, b) => b.points - a.points);
+      setRankedStudents(enriched);
+      setIsSorting(false);
+    };
+
+    fetchAllStats();
   }, [students]);
 
   const filteredStudents = useMemo(() => {
-    return studentsWithTotals.filter((s) => {
+    return rankedStudents.filter((s) => {
       const matchesSearch =
         searchQuery === "" ||
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -244,7 +300,7 @@ export default function LeaderboardTable() {
         branchFilter === "all" || s.branch === branchFilter;
       return matchesSearch && matchesSection && matchesBranch;
     });
-  }, [studentsWithTotals, searchQuery, sectionFilter, branchFilter]);
+  }, [rankedStudents, searchQuery, sectionFilter, branchFilter]);
 
   return (
     <motion.div
@@ -256,10 +312,10 @@ export default function LeaderboardTable() {
       {/* ── Header ── */}
       <div className="px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-4">
         <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-1">
-          Performance Leaderboard
+          LeetCode Leaderboard
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Live rankings across 6 competitive programming platforms
+          Real-time rankings • Hard (5pt) • Medium (3pt) • Easy (1pt)
         </p>
       </div>
 
@@ -308,51 +364,36 @@ export default function LeaderboardTable() {
 
       {/* ── Table ── */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left min-w-[850px]">
-          <thead>
-            <tr className="sticky top-0 z-10 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-xl border-y border-slate-200/50 dark:border-slate-700/50">
-              <th className="px-4 sm:px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-16">
-                Rank
-              </th>
-              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 min-w-[200px]">
-                Student
-              </th>
-              {platformCols.map((p) => (
-                <th
-                  key={p.key}
-                  className="px-3 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center whitespace-nowrap"
-                  title={p.fullName}
-                >
-                  <span className="hidden lg:inline">{p.fullName}</span>
-                  <span className="lg:hidden">{p.label}</span>
-                </th>
-              ))}
-              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center w-24">
-                Profile
-              </th>
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-slate-800 text-xs uppercase text-slate-500 bg-slate-900/50">
+            <tr>
+              <th className="py-4 px-4">Rank</th>
+              <th className="py-4 px-4">Student</th>
+              <th className="py-4 px-4 text-red-500/70">Hard (5pt)</th>
+              <th className="py-4 px-4 text-amber-500/70">Medium (3pt)</th>
+              <th className="py-4 px-4 text-emerald-500/70">Easy (1pt)</th>
+              <th className="py-4 px-4 text-purple-400/70 font-bold">Points</th>
+              <th className="py-4 px-4">Questions</th>
+              <th className="py-4 px-4 text-center">Profile</th>
             </tr>
           </thead>
-          <motion.tbody
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-          >
-            {isLoading ? (
+          <tbody>
+            {(isLoading || isSorting) ? (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={8}
                   className="px-6 py-16 text-center text-slate-400 dark:text-slate-500"
                 >
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div className="text-sm font-semibold">Loading real data...</div>
+                    <div className="text-sm font-semibold">{isLoading ? "Loading students..." : "Fetching live LeetCode stats..."}</div>
                   </div>
                 </td>
               </tr>
             ) : (!filteredStudents || filteredStudents.length === 0) ? (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={8}
                   className="px-6 py-16 text-center text-slate-400 dark:text-slate-500"
                 >
                   <div className="text-lg font-semibold mb-1">
@@ -364,69 +405,11 @@ export default function LeaderboardTable() {
                 </td>
               </tr>
             ) : (
-              filteredStudents.map((student, idx) => (
-                <motion.tr
-                  key={student?.ra || student?.raNumber || idx}
-                  variants={rowVariants}
-                  className="border-b border-slate-100/50 dark:border-slate-800/50
-                    hover:bg-slate-100/40 dark:hover:bg-slate-800/30
-                    transition-colors duration-150 group"
-                >
-                  {/* Rank */}
-                  <td className="px-4 sm:px-6 py-3">
-                    <RankBadge rank={student?.rank || 0} />
-                  </td>
-
-                  {/* Student Info */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="min-w-0">
-                        <div className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white truncate">
-                          {student?.name || "Student"}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-bold font-mono tabular-nums tracking-wide">
-                            {student?.ra || student?.raNumber || "N/A"}
-                          </span>
-                          <span
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getSectionColor(
-                              student?.section || "A1"
-                            )}`}
-                          >
-                            {student?.section || "A1"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Platform Scores */}
-                  {platformCols.map((p) => (
-                    <td
-                      key={p.key}
-                      className={`px-3 py-3 text-center text-sm ${p.key === "totalScore" ? "font-bold" : ""}`}
-                    >
-                      <ScoreCell
-                        value={student ? (student[p.key] ?? 0) : 0}
-                        color={p.color}
-                      />
-                    </td>
-                  ))}
-
-                  {/* Profile Action */}
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => setProfileStudent(student)}
-                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-amber-400 transition-colors"
-                      title="View public profile"
-                    >
-                      <Eye className="w-4 h-4 mx-auto" />
-                    </button>
-                  </td>
-                </motion.tr>
+              filteredStudents.map((student, index) => (
+                <LeetCodeLeaderboardRow key={student.id || student.ra || index} student={student} rank={index + 1} onSelectStudent={setProfileStudent} />
               ))
             )}
-          </motion.tbody>
+          </tbody>
         </table>
       </div>
 
@@ -448,69 +431,10 @@ export default function LeaderboardTable() {
         </span>
       </div>
 
-      {/* ── Student Public Profile Modal ── */}
-      <AnimatePresence>
-        {profileStudent && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-xl mx-4 bg-white dark:bg-[#111115] border border-slate-200 dark:border-[#27272a] shadow-lg dark:shadow-glass rounded-2xl overflow-hidden max-h-[85vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 dark:border-[#27272a]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-amber-500/10 flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-blue-500 dark:text-amber-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Student Coding Profile
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                      {profileStudent.name} • {profileStudent.ra}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setProfileStudent(null)}
-                  className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-6">
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span>Platform Statistics &amp; Metrics</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {platformCols.map((p) => {
-                    const val = profileStudent ? profileStudent[p.key] : null;
-                    return (
-                      <div
-                        key={p.key}
-                        className="p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-150 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center space-y-1.5 text-center"
-                      >
-                        <span className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                          {p.fullName}
-                        </span>
-                        <span className={`text-base font-mono font-bold ${p.color}`}>
-                          {val === null || val === undefined ? "-" : val}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* ── Student Profile Modal ── */}
+      {profileStudent && (
+        <StudentProfileModal student={profileStudent} onClose={() => setProfileStudent(null)} />
+      )}
     </motion.div>
   );
 }

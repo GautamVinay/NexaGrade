@@ -122,6 +122,70 @@ export const fetchLeetCodeStats = async (url: string | null | undefined): Promis
 };
 
 // ═══════════════════════════════════════════════════════════════════
+//  1b. LEETCODE — Recent AC Submission Timestamp (GraphQL)
+//  Returns the Unix timestamp of the student's most recent accepted
+//  submission, or null if unavailable.
+// ═══════════════════════════════════════════════════════════════════
+export const fetchLeetCodeRecentAC = async (
+  url: string | null | undefined
+): Promise<number | null> => {
+  try {
+    if (!url) return null;
+
+    const cleanUrl = url.trim().replace(/\/$/, "");
+    const match = cleanUrl.match(/leetcode\.com\/(?:u\/)?([a-zA-Z0-9_.-]+)/);
+    const username = match ? match[1] : null;
+
+    if (!username) return null;
+
+    const graphqlQuery = {
+      query: `query recentAcSubmissionList($username: String!) {
+  recentAcSubmissionList(username: $username, limit: 1) {
+    timestamp
+  }
+}`,
+      variables: { username },
+    };
+
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Referer: "https://leetcode.com",
+      },
+      body: JSON.stringify(graphqlQuery),
+    });
+
+    if (!res.ok) {
+      console.error(`[Sync] LeetCode Recent AC — HTTP ${res.status}`);
+      return null;
+    }
+
+    const data = await res.json();
+    const submissions = data?.data?.recentAcSubmissionList;
+
+    if (!submissions || !Array.isArray(submissions) || submissions.length === 0) {
+      console.log(`[Sync] LeetCode Recent AC — No recent submissions for ${username}`);
+      return null;
+    }
+
+    const timestamp = parseInt(submissions[0].timestamp, 10);
+    if (isNaN(timestamp)) return null;
+
+    console.log(
+      `[Sync] LeetCode Recent AC for ${username}: ${new Date(timestamp * 1000).toISOString()}`
+    );
+    return timestamp;
+  } catch (error: unknown) {
+    console.error(
+      "[Sync] LeetCode Recent AC Error:",
+      error instanceof Error ? error.message : error
+    );
+    return null;
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
 //  2. CODEFORCES — Official API
 // ═══════════════════════════════════════════════════════════════════
 export const fetchCodeforcesRating = async (url: string): Promise<number> => {
