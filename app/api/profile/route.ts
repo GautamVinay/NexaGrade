@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { syncStudentPlatforms } from "@/lib/syncEngine";
 
-// PATCH /api/profile — Update a student's platform link
+// PATCH /api/profile — Update a student's platform link (LeetCode only)
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
@@ -15,7 +15,8 @@ export async function PATCH(req: Request) {
       );
     }
 
-    // Validate that the platformId is a real column in our Student model
+    // All platforms are valid for profile link storage.
+    // Only LeetCode is used for leaderboard ranking (handled by syncEngine).
     const validPlatforms = [
       "leetcode", "codeforces", "codechef", "hackerrank",
       "geeksforgeeks", "atcoder", "hackerearth", "interviewbit",

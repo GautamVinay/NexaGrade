@@ -1,127 +1,144 @@
 "use client";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, ExternalLink } from "lucide-react";
-
-/* ─── Platform Config ─── */
-const platformConfigs = [
-  { key: "leetcode", label: "LeetCode", initials: "LC", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-  { key: "codechef", label: "CodeChef", initials: "CC", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
-  { key: "codeforces", label: "Codeforces", initials: "CF", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  { key: "hackerrank", label: "HackerRank", initials: "HR", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-  { key: "geeksforgeeks", label: "GeeksForGeeks", initials: "GF", color: "bg-green-500/20 text-green-400 border-green-500/30" },
-  { key: "hackerearth", label: "HackerEarth", initials: "HE", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
-  { key: "atcoder", label: "AtCoder", initials: "AC", color: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
-  { key: "interviewbit", label: "InterviewBit", initials: "IB", color: "bg-teal-500/20 text-teal-400 border-teal-500/30" },
-  { key: "codewars", label: "Codewars", initials: "CW", color: "bg-red-500/20 text-red-400 border-red-500/30" },
-  { key: "topcoder", label: "TopCoder", initials: "TC", color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30" },
-];
+import { User, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function StudentProfileModal({ student, onClose }: { student: any; onClose: () => void }) {
-  // Collect linked platforms (only those with a URL value)
-  const linkedPlatforms = platformConfigs.filter(p => student[p.key] && student[p.key].trim() !== "");
+  // ── Crash-proof URL & username parsing ──
+  const rawUrl: string = student?.leetcodeUsername || student?.leetcode || "";
+  const leetcodeUsername: string = rawUrl
+    ? rawUrl.replace("https://leetcode.com/u/", "").replace("https://leetcode.com/", "").replace(/\/+$/, "")
+    : "N/A";
 
-  return (
+  const leetcodeLink: string = rawUrl.startsWith("http")
+    ? rawUrl
+    : rawUrl
+      ? `https://leetcode.com/u/${leetcodeUsername}`
+      : "";
+  const hasLeetcode: boolean = rawUrl.trim() !== "";
+
+  // ── Portal mount target (must wait for client-side hydration) ──
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const modalContent = (
     <AnimatePresence>
+      {/* ── Fixed Overlay — z-[9999] to guarantee it sits above everything ── */}
       <div
-        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       >
+        {/* ── Inner Card — solid bg, min-height, stopPropagation ── */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-lg mx-4 bg-slate-900 border border-slate-800 shadow-2xl shadow-black/40 rounded-2xl overflow-hidden max-h-[85vh] overflow-y-auto"
+          className="relative w-full max-w-lg mx-4 min-h-[300px] bg-[#0f172a] border border-slate-800 shadow-2xl shadow-black/40 rounded-2xl overflow-hidden max-h-[85vh] overflow-y-auto"
         >
-          {/* ── Close Button ── */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {/* ── Profile Header ── */}
-          <div className="relative px-6 pt-6 pb-5 border-b border-slate-800">
+          {/* ══════════════════════════════════════════════════
+              1. TOP SECTION – Profile Box
+          ══════════════════════════════════════════════════ */}
+          <div className="m-5 rounded-xl border border-slate-700/70 bg-slate-800/40 p-5">
             <div className="flex items-start gap-4">
-              {/* Avatar */}
-              <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center flex-shrink-0">
-                <User className="w-7 h-7 text-slate-400" />
+              {/* Avatar – dark brown/amber tint */}
+              <div className="w-14 h-14 rounded-full bg-amber-900/30 border-2 border-amber-700/50 flex items-center justify-center flex-shrink-0">
+                <User className="w-7 h-7 text-amber-400/80" />
               </div>
 
-              {/* Info */}
+              {/* Name / RA / Email */}
               <div className="flex-1 min-w-0">
                 <h3 className="text-xl font-bold text-white truncate">
-                  {student.name}
+                  {student?.name || "Unknown"}
                 </h3>
-                <div className="mt-1 space-y-0.5">
-                  <p className="text-sm text-slate-400 font-mono">
-                    RA: {student.ra || student.raNumber || "N/A"}
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Email: {student.email || "N/A"}
-                  </p>
-                </div>
 
-                {/* Badges */}
-                <div className="flex items-center gap-2 mt-3">
-                  <span className="px-2.5 py-1 text-xs font-bold rounded-full border border-blue-500/40 bg-blue-500/10 text-blue-400">
-                    {student.branch || "CSE Core"}
-                  </span>
-                  <span className="px-2.5 py-1 text-xs font-bold rounded-full border border-yellow-500/40 bg-yellow-500/10 text-yellow-400">
-                    Section {student.section || "A1"}
-                  </span>
+                <div className="mt-1.5 space-y-0.5">
+                  <p className="text-sm">
+                    <span className="text-slate-500">RA: </span>
+                    <span className="text-white font-mono">
+                      {student?.ra || student?.raNumber || "N/A"}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-slate-500">Email: </span>
+                    <span className="text-white">
+                      {student?.email || "N/A"}
+                    </span>
+                  </p>
                 </div>
+              </div>
+
+              {/* Pill Badges – right aligned */}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0 pt-0.5">
+                <span className="px-2.5 py-1 text-xs font-bold rounded-full border border-blue-500/40 bg-blue-500/10 text-blue-400 whitespace-nowrap">
+                  {student?.branch || "CSE Core"}
+                </span>
+                <span className="px-2.5 py-1 text-xs font-bold rounded-full border border-yellow-500/40 bg-yellow-500/10 text-yellow-400 whitespace-nowrap">
+                  Section {student?.section || "A1"}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* ── Linked Platform Handles ── */}
-          <div className="px-6 py-5">
-            <h4 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">
+          {/* ══════════════════════════════════════════════════
+              2. MIDDLE SECTION – Linked Platform Handles
+          ══════════════════════════════════════════════════ */}
+          <div className="px-5 pb-5">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Linked Platform Handles
             </h4>
 
-            {linkedPlatforms.length === 0 ? (
-              <p className="text-sm text-slate-500 italic">No platform handles linked yet.</p>
+            {hasLeetcode ? (
+              <a
+                href={leetcodeLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 p-3 bg-slate-800/60 border border-slate-700/50 rounded-xl hover:bg-slate-800 hover:border-slate-600 transition-all duration-200"
+              >
+                {/* LE circle icon */}
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold border bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                  LE
+                </div>
+
+                {/* Platform name & URL */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
+                    LeetCode
+                  </div>
+                  <div className="text-xs text-blue-400 truncate font-mono">
+                    {rawUrl || leetcodeLink}
+                  </div>
+                </div>
+
+                {/* External link icon */}
+                <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
+              </a>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {linkedPlatforms.map((platform) => {
-                  const url = student[platform.key];
-                  return (
-                    <a
-                      key={platform.key}
-                      href={url.startsWith("http") ? url : `https://${url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-3 p-3 bg-slate-800/60 border border-slate-700/50 rounded-xl hover:bg-slate-800 hover:border-slate-600 transition-all duration-200"
-                    >
-                      {/* Platform Initial Icon */}
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-extrabold border ${platform.color}`}>
-                        {platform.initials}
-                      </div>
-
-                      {/* Platform Name & URL */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
-                          {platform.label}
-                        </div>
-                        <div className="text-xs text-slate-500 truncate font-mono">
-                          {url}
-                        </div>
-                      </div>
-
-                      {/* External Link Icon */}
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0" />
-                    </a>
-                  );
-                })}
-              </div>
+              <p className="text-sm text-slate-500 italic">No platform handles linked yet.</p>
             )}
+          </div>
+
+          {/* ══════════════════════════════════════════════════
+              3. BOTTOM FOOTER – Divider + Close Audit Button
+          ══════════════════════════════════════════════════ */}
+          <div className="border-t border-slate-700/70">
+            <div className="flex justify-end px-5 py-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-semibold text-slate-300 bg-white/5 border border-slate-700/60 rounded-lg hover:bg-white/10 hover:text-white hover:border-slate-600 transition-all duration-200"
+              >
+                Close Audit
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>
     </AnimatePresence>
   );
+
+  // ── Render via Portal to escape any overflow-hidden / transform containers ──
+  if (!mounted) return null;
+  return createPortal(modalContent, document.body);
 }

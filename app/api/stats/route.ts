@@ -7,19 +7,9 @@ export async function GET() {
 
     const studentCount = students.length;
 
-    // Sum all platform scores across every student
+    // Sum only LeetCode scores across every student
     const totalProblemsSolved = students.reduce((acc: number, s: any) => {
-      return acc
-        + (s.leetcodeScore || 0)
-        + (s.codeforcesScore || 0)
-        + (s.codechefScore || 0)
-        + (s.hackerrankScore || 0)
-        + (s.geeksforgeeksScore || 0)
-        + (s.atcoderScore || 0)
-        + (s.hackerearthScore || 0)
-        + (s.interviewbitScore || 0)
-        + (s.codewarsScore || 0)
-        + (s.topcoderScore || 0);
+      return acc + (s.leetcodeScore || 0);
     }, 0);
 
     return NextResponse.json({

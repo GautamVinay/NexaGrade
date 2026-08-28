@@ -465,6 +465,9 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
                     </div>
 
                     <div className="sm:col-span-2">
+                      <p className="text-sm text-slate-400 mb-3 italic">
+                        Note: You can link any platform for your profile, but currently only LeetCode stats contribute to the leaderboard ranking.
+                      </p>
                       <motion.button
                         whileHover={{ scale: isSaving ? 1 : 1.02 }}
                         whileTap={{ scale: isSaving ? 1 : 0.98 }}
