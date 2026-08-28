@@ -180,12 +180,7 @@ export default function Page() {
                 
                 {/* ── Left Column: Text & CTAs ── */}
                 <div className="lg:col-span-7 space-y-8">
-                  {/* Top Badge */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold
-                    bg-slate-100 dark:bg-[#111115] border border-slate-200 dark:border-[#27272a] shadow-sm">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-500 dark:text-purple-400" />
-                    <span>720 students • 4 colleges • 6 platforms synced daily</span>
-                  </div>
+
 
                   {/* Heading */}
                   <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-slate-900 dark:text-white">

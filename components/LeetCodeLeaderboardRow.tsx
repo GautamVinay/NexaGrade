@@ -16,7 +16,7 @@ export function LeetCodeLeaderboardRow({ student, rank, onSelectStudent }: { stu
     <tr className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
       <td className="py-4 px-4 text-center w-16">{rankDisplay}</td>
       <td className="py-4 px-4">
-        <div className="font-bold text-slate-100">{student.name}</div>
+        <div className="font-bold text-slate-900 dark:text-slate-100">{student.name}</div>
         <div className="text-xs text-slate-500 font-mono">{student.raNumber}</div>
       </td>
       <td className="py-4 px-4 font-bold text-red-500">{isLoading ? "..." : stats.hard}</td>
