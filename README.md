@@ -86,3 +86,9 @@ npm install
 # 4. Run the development server
 npm run dev
 ```
+
+<div align="center">
+  <p><sub>Made by Gautam Vinay (aka ASPHODEL) 👑</sub></p>
+  <!-- Footer Wave -->
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0B1120&height=120&section=footer" width="100%" alt="Footer Wave" />
+</div>
