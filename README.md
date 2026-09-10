@@ -7,7 +7,7 @@
   </a>
   
   <!-- Developer Signature in Purple with Monotype Baskerville font -->
-  <p><sub><span style="color: #A855F7; font-family: 'Monotype Baskerville', 'Baskerville', serif;">Made by <b>Gautam Vinay</b> aka. <i>ASPHODEL</i></span></sub></p>
+  <br/><sub><span style="color: #A855F7; font-family: 'Monotype Baskerville', 'Baskerville', serif;">Made by <b>Gautam Vinay</b> aka. <i>Asphodel</i></span></sub><br/>
   
   <!-- Compact Subtitle in Light Purple -->
   <a href="https://nexagrade.vercel.app/">
