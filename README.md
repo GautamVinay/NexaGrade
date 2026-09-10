@@ -64,7 +64,9 @@ The frontend focuses heavily on a premium, interactive user experience, utilizin
 <div align="center">
   <img src="./SC1.png" alt="NexaGrade Leaderboard View" width="85%" style="border-radius: 8px; margin-bottom: 20px;" />
   <br/><br/>
-  <img src="./SC2.png" alt="NexaGrade Profile Modal" width="85%" style="border-radius: 8px;" />
+  <img src="./SC2.png" alt="NexaGrade Profile Modal" width="85%" style="border-radius: 8px; margin-bottom: 20px;" />
+  <br/><br/>
+  <img src="./SC3.png" alt="NexaGrade Additional View" width="85%" style="border-radius: 8px;" />
 </div>
 
 ---
