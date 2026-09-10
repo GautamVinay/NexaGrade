@@ -1,25 +1,30 @@
 <div align="center">
-  <!-- Header Wave -->
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0B1120&height=220&section=header&text=NexaGrade&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=38bdf8" alt="NexaGrade Header" width="100%" />
-  
-  <!-- Typing Subtitle -->
+  <br/>
+  <!-- Logo and Title side-by-side -->
   <a href="https://nexagrade.vercel.app/">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=500&size=20&pause=1000&color=38BDF8&center=true&vCenter=true&width=600&lines=Educational+Leaderboard+Platform;Automated+LeetCode+Synchronization;Modern+Faculty+Auditing+Dashboard" alt="Typing SVG" />
+    <img src="./logo-nbg.png" alt="NexaGrade Logo" width="85" style="vertical-align: middle; margin-right: 10px;" />
+    <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=800&size=55&color=FFD700&center=false&vCenter=true&width=320&height=80&lines=NexaGrade" alt="NexaGrade Title" style="vertical-align: middle;" />
+  </a>
+  
+  <!-- Developer Signature -->
+  <p><sub>Made by Gautam Vinay (aka ASPHODEL)</sub></p>
+  
+  <!-- Compact Subtitle in Light Purple -->
+  <a href="https://nexagrade.vercel.app/">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=500&size=16&pause=1000&color=D6BCFA&center=true&vCenter=true&width=600&height=30&lines=Educational+Leaderboard+Platform;Automated+LeetCode+Synchronization;Modern+Faculty+Auditing+Dashboard" alt="Typing SVG" />
   </a>
   
   <br/><br/>
   
-  <!-- Live Demo Button -->
+  <!-- Royal Purple & Gold Live Demo Button -->
   <a href="https://nexagrade.vercel.app/">
-    <img src="https://img.shields.io/badge/View_Live_Project-0B1120?style=for-the-badge&logo=vercel&logoColor=white&color=38bdf8&border=slate" alt="Live Demo" />
+    <img src="https://img.shields.io/badge/View_Live_Project-1E1140?style=for-the-badge&logo=vercel&logoColor=FFD700&color=FFD700&labelColor=1E1140" alt="Live Demo" />
   </a>
+  <br/><br/>
 </div>
-
-<br/>
 
 <!-- Tech Stack -->
 <div align="center">
-  <h3>Tech Stack</h3>
   <a href="https://skillicons.dev">
     <img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,nodejs,postgres,prisma,vercel&theme=dark" alt="Tech Stack" />
   </a>
@@ -86,9 +91,3 @@ npm install
 # 4. Run the development server
 npm run dev
 ```
-
-<div align="center">
-  <p><sub>Made by Gautam Vinay (aka ASPHODEL) 👑</sub></p>
-  <!-- Footer Wave -->
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0B1120&height=120&section=footer" width="100%" alt="Footer Wave" />
-</div>
