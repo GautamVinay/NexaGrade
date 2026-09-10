@@ -1,13 +1,13 @@
 <div align="center">
   <br/>
-  <!-- Logo and Title side-by-side -->
+  <!-- Logo (Larger) and Title (Imperial Gold) side-by-side -->
   <a href="https://nexagrade.vercel.app/">
-    <img src="./logo-nbg.png" alt="NexaGrade Logo" width="85" style="vertical-align: middle; margin-right: 10px;" />
-    <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=800&size=55&color=FFD700&center=false&vCenter=true&width=320&height=80&lines=NexaGrade" alt="NexaGrade Title" style="vertical-align: middle;" />
+    <img src="./logo-nbg.png" alt="NexaGrade Logo" width="115" style="vertical-align: middle; margin-right: 15px;" />
+    <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=800&size=55&color=D4AF37&center=false&vCenter=true&width=350&height=80&lines=NexaGrade" alt="NexaGrade Title" style="vertical-align: middle;" />
   </a>
   
-  <!-- Developer Signature -->
-  <p><sub>Made by Gautam Vinay (aka ASPHODEL)</sub></p>
+  <!-- Developer Signature in Purple with Monotype Baskerville font -->
+  <p><sub><span style="color: #A855F7; font-family: 'Monotype Baskerville', 'Baskerville', serif;">Made by <b>Gautam Vinay</b> aka. <i>ASPHODEL</i></span></sub></p>
   
   <!-- Compact Subtitle in Light Purple -->
   <a href="https://nexagrade.vercel.app/">
@@ -16,9 +16,9 @@
   
   <br/><br/>
   
-  <!-- Royal Purple & Gold Live Demo Button -->
+  <!-- Imperial Gold & Royal Purple Live Demo Button -->
   <a href="https://nexagrade.vercel.app/">
-    <img src="https://img.shields.io/badge/View_Live_Project-1E1140?style=for-the-badge&logo=vercel&logoColor=FFD700&color=FFD700&labelColor=1E1140" alt="Live Demo" />
+    <img src="https://img.shields.io/badge/View_Live_Project-1E1140?style=for-the-badge&logo=vercel&logoColor=D4AF37&color=D4AF37&labelColor=1E1140" alt="Live Demo" />
   </a>
   <br/><br/>
 </div>
