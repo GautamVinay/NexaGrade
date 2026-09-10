@@ -13,9 +13,7 @@
   <a href="https://nexagrade.vercel.app/">
     <img src="https://readme-typing-svg.herokuapp.com?font=Inter&weight=500&size=16&pause=1000&color=D6BCFA&center=true&vCenter=true&width=600&height=30&lines=Educational+Leaderboard+Platform;Automated+LeetCode+Synchronization;Modern+Faculty+Auditing+Dashboard" alt="Typing SVG" />
   </a>
-  
-  <br/><br/>
-  
+  <br/>
   <!-- Imperial Gold & Royal Purple Live Demo Button -->
   <a href="https://nexagrade.vercel.app/">
     <img src="https://img.shields.io/badge/View_Live_Project-1E1140?style=for-the-badge&logo=vercel&logoColor=D4AF37&color=D4AF37&labelColor=1E1140" alt="Live Demo" />
