@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Referer": "https://leetcode.com" },
       body: JSON.stringify({ query, variables: { username } }),
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
     const data = await res.json();
     const stats = data?.data?.matchedUser?.submitStatsGlobal?.acSubmissionNum;

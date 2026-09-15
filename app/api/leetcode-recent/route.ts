@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         "Referer": "https://leetcode.com",
       },
       body: JSON.stringify({ query, variables: { username, limit: 1 } }),
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     const data = await res.json();

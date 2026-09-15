@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Eye, X, Plus, Download, CheckCircle, ExternalLink, Globe } from "lucide-react";
+import { User, Eye, X, Plus, Download, CheckCircle, ExternalLink, Globe, Edit2 } from "lucide-react";
 import { LeetCodeActivityCell } from "@/components/LeetCodeActivityCell";
+import EditProfileModal from "@/components/EditProfileModal";
 
 /** Extract a LeetCode username from a profile URL */
 function extractLeetCodeUsername(url: string | null | undefined): string | undefined {
@@ -61,6 +62,7 @@ function ProfileHeader({
   branch,
   section,
   idLabel = "RA:",
+  onEditClick,
 }: {
   name: string;
   ra: string;
@@ -68,6 +70,8 @@ function ProfileHeader({
   branch: string;
   section: string;
   idLabel?: string;
+  /** If provided, renders a subtle pen icon button next to the name */
+  onEditClick?: () => void;
 }) {
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-8 bg-slate-50 dark:bg-[#111115] border border-slate-200 dark:border-[#27272a] rounded-2xl shadow-sm">
@@ -76,9 +80,29 @@ function ProfileHeader({
           <User className="w-8 h-8 text-blue-500 dark:text-amber-500" />
         </div>
         <div className="space-y-3 min-w-0 flex-1">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
-            {name}
-          </h2>
+          {/* Name row — pen icon appears only when onEditClick is provided */}
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+              {name}
+            </h2>
+            {onEditClick && (
+              <button
+                type="button"
+                onClick={onEditClick}
+                aria-label="Edit profile"
+                title="Edit profile"
+                className="
+                  p-1.5 rounded-lg
+                  text-slate-400 hover:text-amber-400
+                  hover:bg-amber-500/10
+                  border border-transparent hover:border-amber-500/20
+                  transition-all duration-200 flex-shrink-0 self-center
+                "
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           <div className="flex flex-col sm:flex-row flex-wrap gap-x-6 gap-y-2 text-sm sm:text-base">
             <div className="flex items-center gap-2">
               <span className="text-slate-400 dark:text-slate-500 font-medium">{idLabel}</span>
@@ -121,6 +145,9 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
   // Student Linked Platforms State — initialized from real DB data, NO mock data
   const [linkedPlatforms, setLinkedPlatforms] = useState<Array<{ id: string; label: string; url: string }>>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Edit Profile modal state — student dashboard only
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   // Stabilize: depend on a primitive that changes when the user record updates
   // updatedAt changes on every DB write, so platform hydration re-runs after PATCH
@@ -358,14 +385,32 @@ export default function Dashboard({ currentUser, userRole, onUserUpdate }: Dashb
       {/* ═══════════ Student View ═══════════ */}
       {userRole === "student" && (
         <div className="space-y-8 animate-fadeIn">
-          {/* Profile Header */}
+          {/* Profile Header — pen icon wired only here */}
           <ProfileHeader
             name={currentUser?.name || "Student"}
             ra={currentUser?.raNumber || currentUser?.ra || "N/A"}
             email={currentUser?.email || "student@srmist.edu.in"}
             branch={currentUser?.branch || "N/A"}
             section={currentUser?.section || "N/A"}
+            onEditClick={() => setShowEditProfile(true)}
           />
+
+          {/* Edit Profile Modal */}
+          {showEditProfile && currentUser && (
+            <EditProfileModal
+              student={currentUser}
+              onClose={() => setShowEditProfile(false)}
+              onSave={(updatedUser) => {
+                // Propagate fresh data to the parent (page.tsx)
+                if (onUserUpdate) onUserUpdate(updatedUser);
+                // Keep localStorage in sync so session survives a hard refresh
+                try {
+                  localStorage.setItem("user", JSON.stringify(updatedUser));
+                } catch (_) {}
+                setShowEditProfile(false);
+              }}
+            />
+          )}
 
           {/* Platforms Link Configuration Card */}
           <div className="space-y-6">

@@ -612,8 +612,21 @@ function ModalContent(props: ModalContentProps) {
   /* ── Student Login submit handler ── */
   const handleStudentLogin = async () => {
     setAuthError(null);
+
     if (!studentLoginId || !studentLoginPw) {
-      setAuthError("Please enter your RA Number/Email and Password.");
+      setAuthError("Please enter your RA Number and Password.");
+      return;
+    }
+
+    // Block email-based login attempts on the client before reaching the network
+    if (studentLoginId.includes("@")) {
+      setAuthError("Please log in using your RA Number.");
+      return;
+    }
+
+    // RA Numbers must start with 'RA' (case-insensitive check for a clear UX message)
+    if (!studentLoginId.trim().toUpperCase().startsWith("RA")) {
+      setAuthError("Invalid format. Your RA Number should start with \"RA\" (e.g., RA2411003010975).");
       return;
     }
 
@@ -624,14 +637,14 @@ function ModalContent(props: ModalContentProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           role: "student",
-          identifier: studentLoginId,
+          identifier: studentLoginId.trim(),
           password: studentLoginPw,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setAuthError(data.error || "Invalid credentials.");
+        setAuthError(data.error || "Invalid RA Number or Password.");
         return;
       }
 
@@ -887,16 +900,30 @@ function ModalContent(props: ModalContentProps) {
                   <label className="label-text">RA Number</label>
                   <input
                     type="text"
-                    placeholder="RA2411..."
+                    placeholder="Enter RA Number (e.g., RA2411003010975)"
                     value={studentLoginId}
-                    onChange={(e) => setStudentLoginId(e.target.value)}
-                    className="glass-input"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setStudentLoginId(val);
+                      // Clear auth error when user corrects their input
+                      if (val && !val.includes("@")) setAuthError(null);
+                    }}
+                    className={`glass-input ${
+                      studentLoginId.includes("@")
+                        ? "border-red-500 focus:ring-red-500/50 focus:border-red-500"
+                        : ""
+                    }`}
                     autoComplete="off"
                     readOnly={isReadOnly}
                     onFocus={() => setIsReadOnly(false)}
                     name="auth_identifier_field_student"
                     id="auth_identifier_field_student"
                   />
+                  {studentLoginId.includes("@") && (
+                    <p className="text-red-500 text-xs mt-1.5 font-medium">
+                      Please log in using your RA Number.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="label-text">Password</label>
@@ -912,9 +939,11 @@ function ModalContent(props: ModalContentProps) {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleStudentLogin}
+                  disabled={studentLoginId.includes("@")}
                   className="w-full py-3 mt-2 rounded-xl font-bold transition-all duration-300
                     bg-gradient-to-r from-blue-500 to-emerald-400 hover:from-blue-600 hover:to-emerald-500 text-white
-                    dark:bg-none dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-black"
+                    dark:bg-none dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-black
+                    disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Login as Student
                 </motion.button>

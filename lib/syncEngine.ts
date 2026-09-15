@@ -75,6 +75,7 @@ export const fetchLeetCodeStats = async (url: string | null | undefined): Promis
         "Referer": "https://leetcode.com",
       },
       body: JSON.stringify(graphqlQuery),
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) throw new Error(`LeetCode GraphQL returned ${res.status}`);
@@ -138,6 +139,7 @@ export const fetchLeetCodeRecentAC = async (
         Referer: "https://leetcode.com",
       },
       body: JSON.stringify(graphqlQuery),
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {

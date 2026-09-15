@@ -15,15 +15,22 @@ export async function POST(req: Request) {
     }
 
     if (role === "student") {
-      const student = await prisma.student.findFirst({
-        where: {
-          OR: [{ raNumber: identifier }, { email: identifier }],
-        },
+      // Server-side guard: reject email identifiers — students must log in with RA Number only
+      if (identifier.includes("@")) {
+        return NextResponse.json(
+          { error: "Please log in using your RA Number, not your email address." },
+          { status: 400 }
+        );
+      }
+
+      // Strict lookup by raNumber only — email fallback is intentionally removed
+      const student = await prisma.student.findUnique({
+        where: { raNumber: identifier.trim() },
       });
 
       if (!student) {
         return NextResponse.json(
-          { error: "Invalid RA Number/Email or Password." },
+          { error: "Invalid RA Number or Password." },
           { status: 401 }
         );
       }
@@ -35,7 +42,7 @@ export async function POST(req: Request) {
 
       if (!isValidPassword) {
         return NextResponse.json(
-          { error: "Invalid RA Number/Email or Password." },
+          { error: "Invalid RA Number or Password." },
           { status: 401 }
         );
       }
